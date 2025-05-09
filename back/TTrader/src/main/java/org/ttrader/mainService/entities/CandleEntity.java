@@ -1,0 +1,115 @@
+package org.ttrader.mainService.entities;
+
+import jakarta.persistence.*;
+
+@Entity
+public class CandleEntity implements CandleEntityFull {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(nullable = false, length = 12)
+    private String ticker;
+
+    @Column(nullable = false)
+    private double open;//cost at the beginning of a candle period
+
+    @Column(nullable = false)
+    private double high;//highest cost in a candle period
+
+    @Column(nullable = false)
+    private double low;//lowest cost in a candle period
+
+    @Column(nullable = false)
+    private double close;//cost at the ending of a candle period
+
+    @Column(nullable = false)
+    private long timestamp; // UNIX seconds
+
+    @Column(nullable = false)
+    private long period; // UNIX seconds
+
+    public CandleEntity() {}
+
+    public CandleEntity(
+        String ticker,
+        double open, double high, double low, double close,
+        long timestamp, long period
+    ) {
+        this.ticker = ticker;
+        this.open = open;
+        this.high = high;
+        this.low = low;
+        this.close = close;
+        this.timestamp = timestamp;
+        this.period = period;
+    }
+
+    public CandleEntity(String ticker, double price, long timestamp, long period) {
+        this.ticker = ticker;
+        this.open = price;
+        this.high = price;
+        this.low = price;
+        this.close = price;
+        this.timestamp = timestamp;
+        this.period = period;
+    }
+
+    public CandleEntity(String ticker, CandleEntityShort candle) {
+        this.ticker = ticker;
+        this.id = candle.getId();
+        this.low = candle.getLow();
+        this.high = candle.getHigh();
+        this.open = candle.getOpen();
+        this.close = candle.getClose();
+        this.timestamp = candle.getTimestamp();
+        this.period = candle.getPeriod();
+    }
+
+    public CandleEntity(CandleEntityFull candle) {
+        this.ticker = candle.getTicker();
+        this.id = candle.getId();
+        this.low = candle.getLow();
+        this.high = candle.getHigh();
+        this.open = candle.getOpen();
+        this.close = candle.getClose();
+        this.timestamp = candle.getTimestamp();
+        this.period = candle.getPeriod();
+    }
+
+    @Override
+    public void setId(Long id) { this.id = id; }
+    @Override
+    public void setOpen(double open) { this.open = open; }
+    @Override
+    public void setHigh(double high) { this.high = high; }
+    @Override
+    public void setLow(double low) { this.low = low; }
+    @Override
+    public void setClose(double close) { this.close = close; }
+    @Override
+    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    @Override
+    public void setPeriod(long period) { this.period = period; }
+
+    @Override
+    public void setTicker(String ticker) { this.ticker = ticker; }
+
+    @Override
+    public Long getId() { return id; }
+    @Override
+    public double getOpen() { return open; }
+    @Override
+    public double getHigh() { return high; }
+    @Override
+    public double getLow() { return low; }
+    @Override
+    public double getClose() { return close; }
+    @Override
+    public long getTimestamp() { return timestamp; }
+    @Override
+    public long getPeriod() { return period; }
+
+    @Override
+    public String getTicker() { return ticker; }
+}
