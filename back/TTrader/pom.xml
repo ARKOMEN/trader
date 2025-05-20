@@ -11,7 +11,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>org.example</groupId>
+    <groupId>org.ttrader</groupId>
     <artifactId>TTrader</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -99,6 +99,12 @@
             <version>8.0.28</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -107,7 +113,135 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
         </plugins>
     </build>
+
+    <profiles>
+        <!-- finnhub service profile -->
+        <profile>
+            <id>finnhub-profile</id>
+            <properties>
+                <mainClass>org.ttrader.finnhubService.FinnhubMain</mainClass>
+                <start-class>${mainClass}</start-class>
+            </properties>
+            <build>
+                <finalName>TTrader-Finnhub-service</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <includes>
+                                                <include>org.ttrader.finnhubService.**</include>
+                                                <include>org.ttrader.util.**</include>
+                                            </includes>
+                                        </filter>
+                                    </filters>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+<!--                <plugins>-->
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-jar-plugin</artifactId>-->
+<!--                        <configuration>-->
+<!--                            <archive>-->
+<!--                                <manifest>-->
+<!--                                    <mainClass>${mainClass}</mainClass>-->
+<!--                                </manifest>-->
+<!--                            </archive>-->
+<!--                            <includes>-->
+<!--                                <include>org.ttrader.finnhubService</include>-->
+<!--                                <include>org.ttrader.util</include>-->
+<!--                            </includes>-->
+<!--                        </configuration>-->
+<!--                    </plugin>-->
+<!--                </plugins>-->
+            </build>
+        </profile>
+
+        <!-- main service profile -->
+        <profile>
+            <id>main-profile</id>
+            <properties>
+                <mainClass>org.ttrader.mainService.MainServiceMain</mainClass>
+                <start-class>${mainClass}</start-class>
+            </properties>
+            <build>
+                <finalName>TTrader-main-service</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <createDependencyReducedPom>false</createDependencyReducedPom>
+<!--                                    <filters>-->
+<!--                                        <filter>-->
+<!--                                            <artifact>*:*</artifact>-->
+<!--                                            <includes>-->
+<!--                                                <include>org.ttrader.mainService.**</include>-->
+<!--                                                <include>org.ttrader.util.**</include>-->
+<!--                                            </includes>-->
+<!--                                        </filter>-->
+<!--                                    </filters>-->
+                                    <relocations>
+                                        <relocation>
+                                            <pattern>org.ttrader</pattern>
+                                            <shadedPattern>org.ttrader</shadedPattern>
+<!--                                            <excludes>-->
+<!--                                                <exclude>org.glassfish.grizzly.utils.conditions.*</exclude>-->
+<!--                                            </excludes>-->
+                                            <includes>
+                                                <include>org.ttrader.mainService.**</include>
+                                                <include>org.ttrader.util.**</include>
+                                            </includes>
+                                        </relocation>
+                                    </relocations>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+<!--                <plugins>-->
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-jar-plugin</artifactId>-->
+<!--                        <configuration>-->
+<!--                            <archive>-->
+<!--                                <manifest>-->
+<!--                                    <mainClass>${mainClass}</mainClass>-->
+<!--                                </manifest>-->
+<!--                            </archive>-->
+<!--                            <includes>-->
+<!--                                <include>org.ttrader.mainService</include>-->
+<!--                                <include>org.ttrader.util</include>-->
+<!--                            </includes>-->
+<!--                        </configuration>-->
+<!--                    </plugin>-->
+<!--                </plugins>-->
+            </build>
+        </profile>
+    </profiles>
 
 </project>

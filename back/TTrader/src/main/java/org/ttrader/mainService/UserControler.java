@@ -1,5 +1,6 @@
 package org.ttrader.mainService;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,7 @@ import javax.json.JsonObject;
 
 @RestController
 @RequestMapping("/")
+@Profile("main-service")
 public class UserControler {
 
 //    @GetMapping("/hello")

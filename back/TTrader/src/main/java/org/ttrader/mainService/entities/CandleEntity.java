@@ -1,6 +1,8 @@
 package org.ttrader.mainService.entities;
 
 import jakarta.persistence.*;
+import org.ttrader.util.CandlePeriod;
+import org.ttrader.util.TickerPrice;
 
 @Entity
 public class CandleEntity implements CandleEntityFull {
@@ -75,6 +77,24 @@ public class CandleEntity implements CandleEntityFull {
         this.close = candle.getClose();
         this.timestamp = candle.getTimestamp();
         this.period = candle.getPeriod();
+    }
+
+    public CandleEntity(TickerPrice tickerPrice, CandlePeriod candlePeriod) {
+        this(
+            tickerPrice.ticker(),
+            tickerPrice.price(),
+            candlePeriod.normalize(tickerPrice.timestamp()),
+            candlePeriod.getUnixPeriod()
+        );
+    }
+
+    public CandleEntity(TickerPrice tickerPrice, long candlePeriod) {
+        this(
+            tickerPrice.ticker(),
+            tickerPrice.price(),
+            CandlePeriod.normalize(tickerPrice.timestamp(), candlePeriod),
+            candlePeriod
+        );
     }
 
     @Override
