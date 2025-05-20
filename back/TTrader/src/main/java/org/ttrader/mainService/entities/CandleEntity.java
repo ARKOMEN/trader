@@ -57,17 +57,6 @@ public class CandleEntity implements CandleEntityFull {
         this.period = period;
     }
 
-    public CandleEntity(String ticker, CandleEntityShort candle) {
-        this.ticker = ticker;
-        this.id = candle.getId();
-        this.low = candle.getLow();
-        this.high = candle.getHigh();
-        this.open = candle.getOpen();
-        this.close = candle.getClose();
-        this.timestamp = candle.getTimestamp();
-        this.period = candle.getPeriod();
-    }
-
     public CandleEntity(CandleEntityFull candle) {
         this.ticker = candle.getTicker();
         this.id = candle.getId();

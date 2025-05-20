@@ -15,6 +15,8 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import java.util.List;
 
+import static org.ttrader.util.JsonUtil.ofStrings;
+
 
 @Service
 //@Profile("finnhub-service,tinkoff-service")
@@ -29,23 +31,7 @@ public class SecondaryWebsocketClient {
 
     private WebSocketSession session;
 
-    private static JsonArrayBuilder ofStrings(String[] strings) {
-        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-        for (String string : strings) {
-            jsonArrayBuilder.add(string);
-        }
-        return jsonArrayBuilder;
-    }
-
-    private static JsonArrayBuilder ofStrings(List<String> strings) {
-        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-        for (String string : strings) {
-            jsonArrayBuilder.add(string);
-        }
-        return jsonArrayBuilder;
-    }
-
-    private static JsonArrayBuilder ofObjects(List<JsonObject> strings) {
+    public static JsonArrayBuilder ofObjects(List<JsonObject> strings) {
         JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
         for (JsonObject string : strings) {
             jsonArrayBuilder.add(string);
