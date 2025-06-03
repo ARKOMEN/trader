@@ -50,27 +50,27 @@ public class TinkoffService extends Endpoint {
         new FigiDescriptor("BBG000Q7GG57", "TQBR"),//2
         /*TGKBP
         "figi": "BBG000Q7GJ60", "classCode": "TQBR", "uid": "45609688-b63e-42dd-88a0-9d30c423c5e5",*/
-        new FigiDescriptor("BBG000Q7GJ60", "TQBR"),//3
+        //new FigiDescriptor("BBG000Q7GJ60", "TQBR"),//3
         /*KUZB
         "figi": "BBG003C53JK1", "classCode": "TQBR", "uid": "879b2e35-edfb-42f4-baa0-8a00cf1edaac",*/
         new FigiDescriptor("BBG003C53JK1", "TQBR"),//4
         /*IGSTP
         "figi": "BBG002B2JCL8", "classCode": "TQBR", "uid": "0c275361-5f48-4138-a592-6da7d275075d",*/
-        new FigiDescriptor("BBG002B2JCL8", "TQBR"),//5
+        //new FigiDescriptor("BBG002B2JCL8", "TQBR"),//5
         /*BANE
         "figi": "BBG004S68758", "classCode": "TQBR", "uid": "0a55e045-e9a6-42d2-ac55-29674634af2f",
         "figi": "RU0007976957", "classCode": "SPEQ", "uid": "83ae56b3-268b-44cf-8fff-529f974b7daa",*/
         new FigiDescriptor("BBG004S68758", "TQBR"),//6
         /*BANEP
         "figi": "BBG004S686N0", "classCode": "TQBR", "uid": "a5776620-1e2f-47ea-bbd6-06d8e4a236d8",*/
-        new FigiDescriptor("BBG004S686N0", "TQBR"),//7
+        //new FigiDescriptor("BBG004S686N0", "TQBR"),//7
         /*PIKK
         "figi": "RU000A0JP7J7", "classCode": "SPEQ", "uid": "26461501-bc5a-4dbb-8c86-bdd85f75bbc6",*//*
         PRMD
         "figi": "TCS20A108JF7", "classCode": "PTEQ", "uid": "3a994025-a846-4355-9acc-ea07d4cc94a8",*//*
         BSPBP
         "figi": "BBG00Z197548", "classCode": "TQBR", "uid": "e71d6238-71ea-400c-9451-edc7b3338a2a",*/
-        new FigiDescriptor("BBG00Z197548", "TQBR"),//8
+        //new FigiDescriptor("BBG00Z197548", "TQBR"),//8
         /*JETL
         "figi": "TCS10A10A0J4", "classCode": "SPBRU", "uid": "34f51a49-919b-4eb1-9ed0-59c26f4cdc1e",*//*
         MRSB
@@ -90,20 +90,20 @@ public class TinkoffService extends Endpoint {
         "figi": "BBG000VFBQG4", "classCode": "SPBXM", "uid": "17b2717d-ad8f-4c73-8481-1e11f76c07f1",*//*
         VGSBP
         "figi": "BBG000FJ6S03", "classCode": "TQBR", "uid": "7b1e51e2-9de2-47d6-bf3d-ab502ee54df8",*/
-        new FigiDescriptor("BBG000FJ6S03", "TQBR"),//13
+        //new FigiDescriptor("BBG000FJ6S03", "TQBR"),//13
         /*NLMK
         "figi": "TCS109046452", "classCode": "SPEQ", "uid": "f9caecff-55e1-4e71-ad06-a58b39bdbe69",
         "figi": "BBG004S681B4", "classCode": "TQBR", "uid": "161eb0d0-aaac-4451-b374-f5d0eeb1b508",*/
-        new FigiDescriptor("BBG004S681B4", "TQBR"),//14
+        //new FigiDescriptor("BBG004S681B4", "TQBR"),//14
         /*NLMK@GS
         "figi": "BBG000PR0PJ6", "classCode": "SPBXM", "uid": "5246eb56-f3ec-415b-812b-f1acd5421d81",*//*
         IVAT
         "figi": "TCS00A108GD8", "classCode": "TQBR", "uid": "1936e51c-d914-4171-ac66-6390a605cb5b",*/
-        new FigiDescriptor("TCS00A108GD8", "TQBR"),//15
+        //new FigiDescriptor("TCS00A108GD8", "TQBR"),//15
         /*MVID
         "figi": "BBG004S68CP5", "classCode": "TQBR", "uid": "cf1c6158-a303-43ac-89eb-9b1db8f96043",
         "figi": "TCS00A0JPGA0", "classCode": "SPEQ", "uid": "78882d6a-c7a4-4ec9-b3ed-863a908cc1b3",*/
-        new FigiDescriptor("BBG004S68CP5", "TQBR"),//16
+        //new FigiDescriptor("BBG004S68CP5", "TQBR"),//16
         /*GAZP
         "figi": "BBG004730RP0", "classCode": "TQBR", "uid": "962e2a95-02a9-4171-abd7-aa198dbe643a",
         "figi": "TCS907661625", "classCode": "041",
@@ -111,7 +111,7 @@ public class TinkoffService extends Endpoint {
         "figi": "TCS007661625", "classCode": "SMAL", "uid": "9100df58-0e92-48ec-b962-4e788e6b61fd",
         "figi": "TCS704730RP0", "classCode": "PTEQ", "uid": "7b8f5a9d-34f7-4fa2-88a3-de83632a9c75",
         "figi": "TCS107661625", "classCode": "BEB", "uid": "0c7b5944-5c97-4d0e-962c-f0c032e19f05",*/
-        new FigiDescriptor("BBG004730RP0", "TQBR"),//17
+        //new FigiDescriptor("BBG004730RP0", "TQBR"),//17
     };
 
     private final Map<String, FigiDescriptor> figis;

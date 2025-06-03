@@ -1,4 +1,4 @@
-package org.ttrader.mainService.mainWebSocketClient;
+package org.ttrader.mainService.mainClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,7 +7,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.ttrader.mainService.DatabaseService;
-import org.ttrader.mainService.entities.CandleEntity;
 import org.ttrader.mainService.entities.CandleEntityFull;
 import org.ttrader.mainService.entities.CandleFunny;
 import org.ttrader.util.TickerPrice;

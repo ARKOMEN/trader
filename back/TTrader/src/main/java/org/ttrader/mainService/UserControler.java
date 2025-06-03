@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.ttrader.mainService.analisys.CompanyDescriptor;
 import org.ttrader.mainService.entities.CandleEntity;
 import org.ttrader.mainService.entities.CandleEntityFull;
 import org.ttrader.mainService.entities.CandleEntityShort;
@@ -36,22 +37,46 @@ public class UserControler {
 
     @GetMapping("/recomend")
     public String recomend() {
-        return Json.createObjectBuilder().add("recomend", ofObjects(
-            userService.getTickers().stream().map(
-                ticker -> Json.createObjectBuilder()
-                    .add("ticker", ticker)
-                    .add("action", Math.random() < 0.3 ? "SALE" : Math.random() < 0.5 ? "BUY" : "HOLD")
-                    .add("reability", Math.random())
-                    .add("company", "COMPANY " + ticker)
+
+        return Json.createObjectBuilder().add("recommend", ofObjects(
+            userService.getRecomendations().stream().map(
+                recomendation -> {
+                    CompanyDescriptor companyDescriptor = userService.getCompany(recomendation.ticker());
+                    return Json.createObjectBuilder()
+                        .add("ticker", recomendation.ticker())
+                        .add("action", recomendation.analysisAction().getValue())
+                        .add("reliability", recomendation.confidence())
+                        .add("company", companyDescriptor.companyName())
+                        .add("url", companyDescriptor.url())
+                        .build();
+                }
+            ).toList()
+        )).build().toString();
+//        return Json.createObjectBuilder().add("recomend", ofObjects(
+//            userService.getTickers().stream().map(
+//                ticker -> Json.createObjectBuilder()
+//                    .add("ticker", ticker)
+//                    .add("action", Math.random() < 0.3 ? "SALE" : Math.random() < 0.5 ? "BUY" : "HOLD")
+//                    .add("reability", Math.random())
+//                    .add("company", "COMPANY " + ticker)
+//                    .build()
+//            ).toList()
+//        )).build().toString();
+    }
+
+    @GetMapping("/news")
+    public String news() {
+        return Json.createObjectBuilder().add("news", ofObjects(
+            userService.getNews().stream().map(
+                newsShort -> Json.createObjectBuilder()
+                    .add("ticker", newsShort.getTicker().getTicker())
+                    .add("title", newsShort.getTitle())
+                    .add("description", newsShort.getDescription())
+                    .add("url", newsShort.getUrl())
                     .build()
             ).toList()
         )).build().toString();
     }
-
-//    @GetMapping("/news")
-//    public JsonObject news() {
-//
-//    }
 
     @GetMapping("/ticker/{ticker}")
     public String ticker(@PathVariable String ticker, @RequestParam Long unit, @RequestParam Long count) {
@@ -70,8 +95,11 @@ public class UserControler {
 
         List<CandleEntityShort> history = userService.getHistory(ticker, unit, count);
 
+        CompanyDescriptor companyDescriptor = userService.getCompany(ticker);
+
         return Json.createObjectBuilder()
-            .add("company", "COMPANY " + ticker)
+            .add("company", companyDescriptor.companyName())
+            .add("url", companyDescriptor.url())
             .add("candles",
                 ofObjects(history.stream().map(
                     candle -> Json.createObjectBuilder()

@@ -31,16 +31,13 @@ public class NewsService1 {
     @Value("${ttrader.finnhub.api_key}")
     private String token;
 
-    private final WebClient webClient;
 
     private final NewsWebsocketClient websocketClient;
 
     //private final List<String> subscribedSymbols = new CopyOnWriteArrayList<>();
 
     private static final String WS_URL = "https://finnhub.io/api/v1";
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private Session session;
-
+    private final WebClient webClient = WebClient.create(WS_URL);
 
     private static final String[] tickers = new String[] {
         "AAPL", "GOOGL", "NVDA", "MSFT", "AMZN", "META", "TSLA", "NFLX", "DIS", "INTC"
@@ -48,7 +45,6 @@ public class NewsService1 {
 
     public NewsService1(NewsWebsocketClient websocketClient) {
         this.websocketClient = websocketClient;
-        this.webClient = WebClient.create(WS_URL);
     }
 
     // Обработка входящих сообщений

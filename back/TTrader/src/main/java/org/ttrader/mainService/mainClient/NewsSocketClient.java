@@ -1,4 +1,4 @@
-package org.ttrader.mainService.mainWebSocketClient;
+package org.ttrader.mainService.mainClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,11 +9,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.ttrader.mainService.DatabaseService;
 import org.ttrader.mainService.entities.CandleEntity;
 import org.ttrader.newsUtil.NewsDescriptor;
-import org.ttrader.util.CandlePeriod;
-import org.ttrader.util.TickerPrice;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NewsSocketClient extends TextWebSocketHandler {
 
@@ -29,7 +26,7 @@ public class NewsSocketClient extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         String text = message.getPayload();
 
-        JsonNode node = null;
+        JsonNode node;
         try {
             node = new ObjectMapper().readTree(text);
         } catch (JsonProcessingException e) {
