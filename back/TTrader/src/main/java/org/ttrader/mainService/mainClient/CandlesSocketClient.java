@@ -3,6 +3,8 @@ package org.ttrader.mainService.mainClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -15,7 +17,8 @@ import org.ttrader.util.CandlePeriod;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CandlesSocketClient extends TextWebSocketHandler {
+@Service
+public class CandlesSocketClient {
 
     private Set<String> tickers;
 
@@ -25,8 +28,8 @@ public class CandlesSocketClient extends TextWebSocketHandler {
         this.databaseService = databaseService;
     }
 
-    @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message) {
+    @RabbitListener(queues = "stocks")
+    public void handleTextMessage(TextMessage message) {
         String text = message.getPayload();
 
         JsonNode node;

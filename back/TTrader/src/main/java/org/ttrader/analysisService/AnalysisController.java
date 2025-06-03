@@ -3,8 +3,12 @@ package org.ttrader.analysisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.ttrader.analysisUtil.AnalysisAction;
@@ -17,11 +21,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Profile("analysis-service")
-@RestController
-@RequestMapping("/api")
+@Service
+//@RestController
+//@RequestMapping("/api")
 public class AnalysisController {
-    @PostMapping("/analyse")
-    public String analyse(@RequestBody String requestBody) {
+    private final RabbitTemplate rabbitTemplate;
+
+    public AnalysisController(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
+
+    @RabbitListener(queues = "analysis")
+    public String analyse(/*@RequestBody*/ String requestBody) {
         JsonNode node;
         List<AnalysisCandle> candles;
         try {

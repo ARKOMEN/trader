@@ -1,6 +1,7 @@
 package org.ttrader.secondaryServicesUtil;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
@@ -22,85 +23,45 @@ import static org.ttrader.util.TTraderUtil.ofStrings;
 @Service
 @Conditional(SecondaryWebsocketServiceCondition.class)
 public class SecondaryWebsocketClient {
+    private final RabbitTemplate rabbitTemplate;
 
-    private WebSocketClient client;
-    private final String WS_URI = "ws://localhost:8080/candles";
-
-    private WebSocketSession session;
-
-    @PostConstruct
-    public synchronized void start() {
-        try {
-            for (int i = 0; true; ++i) {
-                try {
-                    client = new StandardWebSocketClient();
-                    session = client.execute(new TextWebSocketHandler(), WS_URI).get();
-                    break;
-                }
-                catch (Exception e) {
-                    if (i < 5) {
-                        System.err.println("Connection failure! Retrying reconnection in 1 second...");
-                        Thread.sleep(1000);
-                    }
-                    else throw new Exception("Can't connect to server", e);
-                }
-            }
-
-            System.out.println("WebSocket connection established to " + WS_URI);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        finally {
-            this.notifyAll();
-        }
+    public SecondaryWebsocketClient(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public synchronized void informAboutTickers(String[] tickers) {
-        try {
-            session.sendMessage(new TextMessage(Json.createObjectBuilder()
+        rabbitTemplate.convertAndSend(
+            "stocks",
+            Json.createObjectBuilder()
                 .add("type", "tickers")
                 .add("tickers", ofStrings(tickers))
                 .build().toString()
-            ));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        );
     }
 
     public synchronized void informAboutTickers(Collection<String> tickers) {
-        try {
-            while (session == null || !session.isOpen()) {
-                this.wait();
-            }
-            session.sendMessage(new TextMessage(Json.createObjectBuilder()
+        rabbitTemplate.convertAndSend(
+            "stocks",
+            Json.createObjectBuilder()
                 .add("type", "tickers")
                 .add("tickers", ofStrings(tickers))
                 .build().toString()
-            ));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        );
     }
 
     public synchronized void sendMessage(List<TickerPrice> candles) {
-        if (session != null && session.isOpen()) {
-            try {
-                String message = Json.createObjectBuilder()
-                    .add("type", "prices")
-                    .add("prices",
-                        ofObjects(candles.stream().map(e -> Json.createObjectBuilder()
-                            .add("i", e.ticker())
-                            .add("t", e.timestamp())
-                            .add("p", e.price())
-                            .build()
-                        ).toList())
-                    ).build().toString();
-                session.sendMessage(new TextMessage(message));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("WebSocket session is not open!");
-        }
+        rabbitTemplate.convertAndSend(
+            "stocks",
+            Json.createObjectBuilder()
+                .add("type", "prices")
+                .add("prices",
+                    ofObjects(candles.stream().map(e -> Json.createObjectBuilder()
+                        .add("i", e.ticker())
+                        .add("t", e.timestamp())
+                        .add("p", e.price())
+                        .build()
+                    ).toList())
+                ).build().toString()
+        );
     }
 }
