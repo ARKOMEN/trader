@@ -1,35 +1,33 @@
-package org.ttrader.secondaryServicesUtil;
+package org.ttrader.newsService;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.ttrader.util.TickerPrice;
+import org.ttrader.newsUtil.NewsDescriptor;
 
 import javax.json.Json;
-import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 import static org.ttrader.util.TTraderUtil.ofObjects;
-import static org.ttrader.util.TTraderUtil.ofStrings;
 
 
 @Service
-@Conditional(SecondaryWebsocketServiceCondition.class)
-public class SecondaryWebsocketClient {
+@Profile("news-service")
+public class NewsWebsocketClient {
 
     private WebSocketClient client;
-    private final String WS_URI = "ws://localhost:8080/candles";
+    private final String WS_URI = "ws://localhost:8080/news";
 
     private WebSocketSession session;
 
     @PostConstruct
     public synchronized void start() {
+        System.err.println("starting...");
         try {
             for (int i = 0; true; ++i) {
                 try {
@@ -55,43 +53,17 @@ public class SecondaryWebsocketClient {
         }
     }
 
-    public synchronized void informAboutTickers(String[] tickers) {
-        try {
-            session.sendMessage(new TextMessage(Json.createObjectBuilder()
-                .add("type", "tickers")
-                .add("tickers", ofStrings(tickers))
-                .build().toString()
-            ));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public synchronized void informAboutTickers(Collection<String> tickers) {
-        try {
-            while (session == null || !session.isOpen()) {
-                this.wait();
-            }
-            session.sendMessage(new TextMessage(Json.createObjectBuilder()
-                .add("type", "tickers")
-                .add("tickers", ofStrings(tickers))
-                .build().toString()
-            ));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public synchronized void sendMessage(List<TickerPrice> candles) {
+    public synchronized void sendMessage(List<NewsDescriptor> news) {
         if (session != null && session.isOpen()) {
             try {
                 String message = Json.createObjectBuilder()
-                    .add("type", "prices")
-                    .add("prices",
-                        ofObjects(candles.stream().map(e -> Json.createObjectBuilder()
-                            .add("i", e.ticker())
-                            .add("t", e.timestamp())
-                            .add("p", e.price())
+                    .add("news",
+                        ofObjects(news.stream().map(e -> Json.createObjectBuilder()
+                            .add("k", e.ticker())
+                            .add("t", e.title())
+                            .add("d", e.description())
+                            .add("i", e.id())
+                            .add("u", e.url())
                             .build()
                         ).toList())
                     ).build().toString();

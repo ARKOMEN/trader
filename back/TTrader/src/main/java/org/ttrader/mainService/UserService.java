@@ -3,6 +3,7 @@ package org.ttrader.mainService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.ttrader.mainService.entities.CandleEntity;
+import org.ttrader.mainService.entities.CandleEntityFull;
 import org.ttrader.mainService.entities.CandleEntityShort;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class UserService {
         return databaseService.getHistory(ticker, unit, amount);
     }
 
-    Optional<CandleEntity> getCurrent(String ticker, long unit) {
+    Optional<CandleEntityFull> getCurrent(String ticker, long unit) {
         return databaseService.getCurrent(ticker, unit);
     }
 

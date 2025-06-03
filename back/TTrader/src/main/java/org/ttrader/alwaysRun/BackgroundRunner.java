@@ -9,7 +9,7 @@ public class BackgroundRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("Test profile active. Running background process...");
-        Thread.currentThread().join(); // Блокирует текущий поток навсегда
+        System.err.println("Your app will RUN forever...");
+        Thread.currentThread().join();
     }
 }

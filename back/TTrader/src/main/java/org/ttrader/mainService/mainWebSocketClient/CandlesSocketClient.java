@@ -8,19 +8,21 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.ttrader.mainService.DatabaseService;
 import org.ttrader.mainService.entities.CandleEntity;
+import org.ttrader.mainService.entities.CandleEntityFull;
+import org.ttrader.mainService.entities.CandleFunny;
 import org.ttrader.util.TickerPrice;
 import org.ttrader.util.CandlePeriod;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MainSocketClient extends TextWebSocketHandler {
+public class CandlesSocketClient extends TextWebSocketHandler {
 
     private Set<String> tickers;
 
     private final DatabaseService databaseService;
-    private final Map<String, List<CandleEntity>> candles = new HashMap<>();
-    public MainSocketClient(DatabaseService databaseService) {
+    private final Map<String, List<? extends CandleEntityFull>> candles = new HashMap<>();
+    public CandlesSocketClient(DatabaseService databaseService) {
         this.databaseService = databaseService;
     }
 
@@ -28,7 +30,7 @@ public class MainSocketClient extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         String text = message.getPayload();
 
-        JsonNode node = null;
+        JsonNode node;
         try {
             node = new ObjectMapper().readTree(text);
         } catch (JsonProcessingException e) {
@@ -54,14 +56,14 @@ public class MainSocketClient extends TextWebSocketHandler {
                     ));
                 }
 
-                List<CandleEntity> newCandles = new ArrayList<>();
+                List<CandleEntityFull> newCandles = new ArrayList<>();
 
                 for (TickerPrice tickerPrice : tickerPrices) {
 
-                    List<CandleEntity> candleEntityList = candles.computeIfAbsent(tickerPrice.ticker(), ignored ->
+                    List<CandleEntityFull> candleEntityList = (List<CandleEntityFull>) candles.computeIfAbsent(tickerPrice.ticker(), ignored ->
                         {
-                            List<CandleEntity> temp = Arrays.stream(CandlePeriod.all).map(
-                                p -> new CandleEntity(tickerPrice, p)
+                            List<CandleEntityFull> temp = Arrays.stream(CandlePeriod.all).map(
+                                p -> new CandleFunny(tickerPrice, p)
                             ).collect(Collectors.toList());
                             newCandles.addAll(temp);
                             return temp;
@@ -69,7 +71,7 @@ public class MainSocketClient extends TextWebSocketHandler {
                     );
 
                     for (int i = 0; i < candleEntityList.size(); ++i) {
-                        CandleEntity candle = candleEntityList.get(i);
+                        CandleEntityFull candle = candleEntityList.get(i);
                         long normalizedTimestamp = CandlePeriod.normalize(tickerPrice.timestamp(), candle.getPeriod());
                         if (candle.getTimestamp() == normalizedTimestamp) {
 
@@ -80,11 +82,12 @@ public class MainSocketClient extends TextWebSocketHandler {
                                 candle.setLow(tickerPrice.price());
                         } else {
                             newCandles.add(candle);
-                            candleEntityList.set(i, new CandleEntity(tickerPrice, candle.getPeriod()));
+                            CandleEntityFull c = new CandleFunny(tickerPrice, candle.getPeriod());
+                            candleEntityList.set(i, c);
                         }
                     }
                 }
-                databaseService.saveAll(newCandles);
+                databaseService.saveAllFunnies(newCandles);
             }
         }
     }

@@ -1,6 +1,7 @@
 package org.ttrader.mainService.entities;
 
 import jakarta.persistence.*;
+import jdk.jshell.spi.ExecutionControl;
 import org.ttrader.util.CandlePeriod;
 import org.ttrader.util.TickerPrice;
 
@@ -9,32 +10,24 @@ public class CandleEntity implements CandleEntityFull {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @Column(nullable = false, length = 12)
-    private String ticker;
-
+    @ManyToOne
+    @JoinColumn(name = "ticker", nullable = false)
+    private TickerEntity ticker;
     @Column(nullable = false)
     private double open;//cost at the beginning of a candle period
-
     @Column(nullable = false)
     private double high;//highest cost in a candle period
-
     @Column(nullable = false)
     private double low;//lowest cost in a candle period
-
     @Column(nullable = false)
     private double close;//cost at the ending of a candle period
-
     @Column(nullable = false)
     private long timestamp; // UNIX seconds
-
     @Column(nullable = false)
     private long period; // UNIX seconds
-
     public CandleEntity() {}
-
     public CandleEntity(
-        String ticker,
+        TickerEntity ticker,
         double open, double high, double low, double close,
         long timestamp, long period
     ) {
@@ -47,7 +40,7 @@ public class CandleEntity implements CandleEntityFull {
         this.period = period;
     }
 
-    public CandleEntity(String ticker, double price, long timestamp, long period) {
+    public CandleEntity(TickerEntity ticker, double price, long timestamp, long period) {
         this.ticker = ticker;
         this.open = price;
         this.high = price;
@@ -57,34 +50,43 @@ public class CandleEntity implements CandleEntityFull {
         this.period = period;
     }
 
-    public CandleEntity(CandleEntityFull candle) {
-        this.ticker = candle.getTicker();
-        this.id = candle.getId();
-        this.low = candle.getLow();
-        this.high = candle.getHigh();
-        this.open = candle.getOpen();
-        this.close = candle.getClose();
-        this.timestamp = candle.getTimestamp();
-        this.period = candle.getPeriod();
-    }
+//    public CandleEntity(CandleEntityFull candle) {
+//        this.ticker = candle.getTicker();
+//        this.id = candle.getId();
+//        this.low = candle.getLow();
+//        this.high = candle.getHigh();
+//        this.open = candle.getOpen();
+//        this.close = candle.getClose();
+//        this.timestamp = candle.getTimestamp();
+//        this.period = candle.getPeriod();
+//    }
 
-    public CandleEntity(TickerPrice tickerPrice, CandlePeriod candlePeriod) {
-        this(
-            tickerPrice.ticker(),
-            tickerPrice.price(),
-            candlePeriod.normalize(tickerPrice.timestamp()),
-            candlePeriod.getUnixPeriod()
-        );
-    }
-
-    public CandleEntity(TickerPrice tickerPrice, long candlePeriod) {
-        this(
-            tickerPrice.ticker(),
-            tickerPrice.price(),
-            CandlePeriod.normalize(tickerPrice.timestamp(), candlePeriod),
-            candlePeriod
-        );
-    }
+//    public CandleEntity(TickerPrice tickerPrice, CandlePeriod candlePeriod) {
+//        this(
+//            tickerPrice.ticker(),
+//            tickerPrice.price(),
+//            candlePeriod.normalize(tickerPrice.timestamp()),
+//            candlePeriod.getUnixPeriod()
+//        );
+//    }
+//
+//    public CandleEntity(TickerPrice tickerPrice, CandlePeriod candlePeriod) {
+//        this(
+//            tickerPrice.ticker(),
+//            tickerPrice.price(),
+//            candlePeriod.normalize(tickerPrice.timestamp()),
+//            candlePeriod.getUnixPeriod()
+//        );
+//    }
+//
+//    public CandleEntity(TickerPrice tickerPrice, long candlePeriod) {
+//        this(
+//            tickerPrice.ticker(),
+//            tickerPrice.price(),
+//            CandlePeriod.normalize(tickerPrice.timestamp(), candlePeriod),
+//            candlePeriod
+//        );
+//    }
 
     @Override
     public void setId(Long id) { this.id = id; }
@@ -102,7 +104,15 @@ public class CandleEntity implements CandleEntityFull {
     public void setPeriod(long period) { this.period = period; }
 
     @Override
-    public void setTicker(String ticker) { this.ticker = ticker; }
+    public void setTicker(String ticker) {
+        try {
+            throw new ExecutionControl.NotImplementedException("setting ticker is not implemented =(");
+        } catch (ExecutionControl.NotImplementedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setTicker(TickerEntity ticker) { this.ticker = ticker; }
 
     @Override
     public Long getId() { return id; }
@@ -120,5 +130,7 @@ public class CandleEntity implements CandleEntityFull {
     public long getPeriod() { return period; }
 
     @Override
-    public String getTicker() { return ticker; }
+    public String getTicker() { return ticker.getTicker(); }
+
+    public TickerEntity getTickerReal() { return ticker; }
 }

@@ -118,63 +118,6 @@
     </build>
 
     <profiles>
-        <!-- finnhub service profile -->
-<!--        <profile>-->
-<!--            <id>finnhub-profile</id>-->
-<!--            <properties>-->
-<!--                <mainClass>org.ttrader.finnhubService.FinnhubMain</mainClass>-->
-<!--                <start-class>${mainClass}</start-class>-->
-<!--            </properties>-->
-<!--            <build>-->
-<!--                <finalName>TTrader-Finnhub-service</finalName>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-shade-plugin</artifactId>-->
-<!--                        <version>3.3.0</version>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <phase>package</phase>-->
-<!--                                <goals>-->
-<!--                                    <goal>shade</goal>-->
-<!--                                </goals>-->
-<!--                                <configuration>-->
-<!--                                    <createDependencyReducedPom>false</createDependencyReducedPom>-->
-<!--                                    <filters>-->
-<!--                                        <filter>-->
-<!--                                            <artifact>*:*</artifact>-->
-<!--                                            <includes>-->
-<!--                                                <include>org.ttrader.finnhubService.**</include>-->
-<!--                                                <include>org.ttrader.util.**</include>-->
-<!--                                            </includes>-->
-<!--                                        </filter>-->
-<!--                                    </filters>-->
-<!--                                </configuration>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--                -->
-<!--&lt;!&ndash;                <plugins>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <plugin>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <groupId>org.apache.maven.plugins</groupId>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <artifactId>maven-jar-plugin</artifactId>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <configuration>&ndash;&gt;-->
-<!--&lt;!&ndash;                            <archive>&ndash;&gt;-->
-<!--&lt;!&ndash;                                <manifest>&ndash;&gt;-->
-<!--&lt;!&ndash;                                    <mainClass>${mainClass}</mainClass>&ndash;&gt;-->
-<!--&lt;!&ndash;                                </manifest>&ndash;&gt;-->
-<!--&lt;!&ndash;                            </archive>&ndash;&gt;-->
-<!--&lt;!&ndash;                            <includes>&ndash;&gt;-->
-<!--&lt;!&ndash;                                <include>org.ttrader.finnhubService</include>&ndash;&gt;-->
-<!--&lt;!&ndash;                                <include>org.ttrader.util</include>&ndash;&gt;-->
-<!--&lt;!&ndash;                            </includes>&ndash;&gt;-->
-<!--&lt;!&ndash;                        </configuration>&ndash;&gt;-->
-<!--&lt;!&ndash;                    </plugin>&ndash;&gt;-->
-<!--&lt;!&ndash;                </plugins>&ndash;&gt;-->
-<!--            </build>-->
-<!--        </profile>-->
-
         <!-- main service profile -->
         <profile>
             <id>main-profile</id>
@@ -184,63 +127,43 @@
             </properties>
             <build>
                 <finalName>TTrader-main-service</finalName>
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-shade-plugin</artifactId>-->
-<!--                        <version>3.3.0</version>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <phase>package</phase>-->
-<!--                                <goals>-->
-<!--                                    <goal>shade</goal>-->
-<!--                                </goals>-->
-<!--                                <configuration>-->
-<!--                                    <createDependencyReducedPom>false</createDependencyReducedPom>-->
-<!--&lt;!&ndash;                                    <filters>&ndash;&gt;-->
-<!--&lt;!&ndash;                                        <filter>&ndash;&gt;-->
-<!--&lt;!&ndash;                                            <artifact>*:*</artifact>&ndash;&gt;-->
-<!--&lt;!&ndash;                                            <includes>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <include>org.ttrader.mainService.**</include>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <include>org.ttrader.util.**</include>&ndash;&gt;-->
-<!--&lt;!&ndash;                                            </includes>&ndash;&gt;-->
-<!--&lt;!&ndash;                                        </filter>&ndash;&gt;-->
-<!--&lt;!&ndash;                                    </filters>&ndash;&gt;-->
-<!--                                    <relocations>-->
-<!--                                        <relocation>-->
-<!--                                            <pattern>org.ttrader</pattern>-->
-<!--                                            <shadedPattern>org.ttrader</shadedPattern>-->
-<!--&lt;!&ndash;                                            <excludes>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <exclude>org.glassfish.grizzly.utils.conditions.*</exclude>&ndash;&gt;-->
-<!--&lt;!&ndash;                                            </excludes>&ndash;&gt;-->
-<!--                                            <includes>-->
-<!--                                                <include>org.ttrader.mainService.**</include>-->
-<!--                                                <include>org.ttrader.util.**</include>-->
-<!--                                            </includes>-->
-<!--                                        </relocation>-->
-<!--                                    </relocations>-->
-<!--                                </configuration>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-jar-plugin</artifactId>-->
-<!--                        <configuration>-->
-<!--                            <archive>-->
-<!--                                <manifest>-->
-<!--                                    <mainClass>${mainClass}</mainClass>-->
-<!--                                </manifest>-->
-<!--                            </archive>-->
-<!--                            <includes>-->
-<!--                                <include>org.ttrader.mainService</include>-->
-<!--                                <include>org.ttrader.util</include>-->
-<!--                            </includes>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
+
+            </build>
+        </profile>
+        <!-- finnhub service profile -->
+        <profile>
+            <id>finnhub-profile</id>
+            <properties>
+                <mainClass>org.ttrader.finnhubService.FinnhubMain</mainClass>
+                <start-class>${mainClass}</start-class>
+            </properties>
+            <build>
+                <finalName>TTrader-finnhub-service</finalName>
+
+            </build>
+        </profile>
+        <!-- tinkoff service profile -->
+        <profile>
+            <id>tinkoff-profile</id>
+            <properties>
+                <mainClass>org.ttrader.tinkoffService.TinkoffMain</mainClass>
+                <start-class>${mainClass}</start-class>
+            </properties>
+            <build>
+                <finalName>TTrader-tinkoff-service</finalName>
+
+            </build>
+        </profile>
+        <!-- news service profile -->
+        <profile>
+            <id>news-profile</id>
+            <properties>
+                <mainClass>org.ttrader.newsService.NewsApiMain</mainClass>
+                <start-class>${mainClass}</start-class>
+            </properties>
+            <build>
+                <finalName>TTrader-news-service</finalName>
+
             </build>
         </profile>
     </profiles>

@@ -5,21 +5,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.ttrader.mainService.entities.CandleEntity;
+import org.ttrader.mainService.entities.CandleEntityFull;
 import org.ttrader.mainService.entities.CandleEntityShort;
 import org.ttrader.util.CandlePeriod;
 
 import javax.json.Json;
-import javax.json.JsonObject;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.ttrader.secondaryServicesUtil.SecondaryWebsocketClient.ofObjects;
+import static org.ttrader.util.TTraderUtil.ofObjects;
 
 @RestController
-@RequestMapping("/")
-@Profile("main-service")
+@RequestMapping("/api")
+@Profile("finnhub-service")
 public class UserControler {
 
     private final UserService userService;
@@ -96,12 +96,12 @@ public class UserControler {
             candlePeriod = period1.get();
         }
 
-        Optional<CandleEntity> candleEntity = userService.getCurrent(ticker, unit);
+        Optional<CandleEntityFull> candleEntity = userService.getCurrent(ticker, unit);
 
         if (candleEntity.isEmpty())
             return Json.createObjectBuilder().add("present", false).build().toString();
 
-        CandleEntity candle = candleEntity.get();
+        CandleEntityFull candle = candleEntity.get();
 
         return Json.createObjectBuilder()
             .add("present", true)

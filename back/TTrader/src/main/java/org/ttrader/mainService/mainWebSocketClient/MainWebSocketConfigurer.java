@@ -15,12 +15,15 @@ public class MainWebSocketConfigurer implements WebSocketConfigurer {
     private final DatabaseService databaseService;
 
     public MainWebSocketConfigurer(DatabaseService databaseService) {
+        System.err.println("?????????????????????????????????????im here guys????????????????????");
         this.databaseService = databaseService;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new MainSocketClient(databaseService), "/candles")/*.setAllowedOrigins("https://localhost")*/;
+        System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!im here guys!!!!!!!!!!!!!!!!!!!!");
+        registry.addHandler(new CandlesSocketClient(databaseService), "/candles")/*.setAllowedOrigins("https://localhost")*/;
+        registry.addHandler(new NewsSocketClient(databaseService), "/news");
     }
 
 }

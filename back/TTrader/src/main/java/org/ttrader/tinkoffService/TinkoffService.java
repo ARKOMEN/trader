@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.ttrader.secondaryServicesUtil.SecondaryWebsocketClient;
-import org.ttrader.util.JsonUtil;
+import org.ttrader.util.TTraderUtil;
 import org.ttrader.util.TickerPrice;
 
 import javax.json.Json;
@@ -216,7 +216,7 @@ public class TinkoffService extends Endpoint {
                     Json.createObjectBuilder().add(
                         "subscribeLastPriceRequest", Json.createObjectBuilder()
                             .add("subscriptionAction", subscription)
-                            .add("instruments", JsonUtil.ofObjects(symbols.stream().map(
+                            .add("instruments", TTraderUtil.ofObjects(symbols.stream().map(
                                     figi -> Json.createObjectBuilder().add("figi", figi).build()
                                 ).toList()).build()
                             )

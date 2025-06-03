@@ -19,7 +19,7 @@ import java.util.*;
 
 @Service
 @ClientEndpoint
-@Profile("finnhub-service,tinkoff-service")
+@Profile("finnhub-service")
 public class FinnhubService {
 
     @Value("${ttrader.finnhub.api_key}")
@@ -38,13 +38,14 @@ public class FinnhubService {
         "AAPL", "GOOGL", "NVDA", "MSFT", "AMZN", "META", "TSLA", "NFLX", "DIS", "INTC"
     };
 
-    public FinnhubService(SecondaryWebsocketClient finnhubService) {
-        this.websocketClient = finnhubService;
+    public FinnhubService(SecondaryWebsocketClient websocketClient) {
+        this.websocketClient = websocketClient;
     }
 
     // Автоматическое подключение при старте приложения
     @PostConstruct
     public void init() {
+        websocketClient.informAboutTickers(tickers);
         connect();
     }
 
