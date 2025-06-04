@@ -1,5 +1,6 @@
 package org.ttrader.mainService;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,11 @@ public class DatabaseService {
     private final TickerRepository tickerRepository;
     private final NewsRepository newsRepository;
 
-    private final Map<String, TickerEntity> tickers = new HashMap<>();
+    private final Set<String> allTickers;
 
-    private final Map<String, Map<Long, CandleEntityFull>> cache = new HashMap<>();
+    private final Map<String, Map<Long, CandleEntityFull>> cache;
+
+    private final EntityManager entityManager;
 
     private static final Map<String, CompanyDescriptor> companyMap = Arrays.stream(new CompanyDescriptor[] {
         new CompanyDescriptor("AAPL", "Apple Inc.", "https://www.nasdaq.com/market-activity/stocks/aapl"),
@@ -48,94 +51,108 @@ public class DatabaseService {
         new CompanyDescriptor("NLMK", "Новолипецкий металлургический комбинат ПАО", "https://www.moex.com/ru/issue.aspx?board=TQBR&code=NLMK"),
         new CompanyDescriptor("MGNT", "Магнит ПАО", "https://www.moex.com/ru/issue.aspx?board=TQBR&code=BSPBP"),
     }).collect(Collectors.toMap(CompanyDescriptor::ticker, c -> c, (a, b) -> {throw new IllegalStateException("dublicating tickers");}));
-//        Map.of(
-//        "AAPL", new CompanyDescriptor("AAPL", "Apple Inc.", "https://www.nasdaq.com/market-activity/stocks/aapl"),
-//        "GOOGL", new CompanyDescriptor("GOOGL", "Google Inc,", "https://www.nasdaq.com/market-activity/stocks/googl"),
-//        "NVDA", new CompanyDescriptor("NVDA", "NVIDIA Corp.", "https://www.nasdaq.com/market-activity/stocks/nvda"),
-//        "MSFT", new CompanyDescriptor("MSFT", "Microsoft Corp.", "https://www.nasdaq.com/market-activity/stocks/msft"),
-//        "AMZN", new CompanyDescriptor("AMZN", "Amazon Inc.", "https://www.nasdaq.com/market-activity/stocks/amzn"),
-//        "META", new CompanyDescriptor("META", "Meta Inc.", "https://www.nasdaq.com/market-activity/stocks/meta"),
-//        "TSLA", new CompanyDescriptor("TSLA", "Tesla Inc.", "https://www.nasdaq.com/market-activity/stocks/tsla"),
-//        "NFLX", new CompanyDescriptor("NFLX", "Netflix Inc.", "https://www.nasdaq.com/market-activity/stocks/nflx"),
-//        "DIS", new CompanyDescriptor("DIS", "Walt Disney Comp.", "https://www.nasdaq.com/market-activity/stocks/dis"),
-//        "INTC", new CompanyDescriptor("INTC", "Intel Corp.", "https://www.nasdaq.com/market-activity/stocks/intc"),
-//        "OGKB",  new CompanyDescriptor("", "", "")
-//    );
 
     public static long getCurrentTime() {
         return Instant.now().getEpochSecond();
     }
 
-    public DatabaseService(CandleRepository candleRepository, TickerRepository tickerRepository, NewsRepository newsRepository) {
+    public DatabaseService(CandleRepository candleRepository, TickerRepository tickerRepository, NewsRepository newsRepository, EntityManager entityManager) {
         this.candleRepository = candleRepository;
         this.tickerRepository = tickerRepository;
         this.newsRepository = newsRepository;
+        this.entityManager = entityManager;
+
+        this.allTickers = tickerRepository.findAll().stream().map(TickerShort::getTicker).collect(Collectors.toSet());
+        this.cache = this.allTickers.stream().collect(Collectors.toMap(t -> t, t -> new HashMap<>(), (a, b) -> null));
     }
 
-    public void saveCandle(CandleEntity candle) { candleRepository.save(candle); }
-
-    public void saveAllEntities(List<CandleEntity> candles) {
-        System.err.println("Saving " + candles.size() + " candles");
-        for (CandleEntity candle : candles) {
-            candleRepository.save(candle);
-            cache.get(candle.getTicker()).compute(candle.getPeriod(),
-                (key, candle1) -> candle1 == null || candle.getTimestamp() > candle1.getTimestamp() ? candle : candle1
-            );
-        }
-    }
-
-    public void saveAllFunnies(List<? extends CandleEntityFull> candles) {
+    public synchronized void saveAllFunnies(List<? extends CandleEntityFull> candles) {
+        informAboutTickers(candles.stream().map(CandleEntityFull::getTicker).toList());
         System.err.println("Saving " + candles.size() + " candles");
         for (CandleEntityFull candle : candles) {
-            candleRepository.save(candle.getOpen(), candle.getHigh(), candle.getLow(), candle.getClose(), candle.getTicker(), candle.getTimestamp(), candle.getPeriod());
+            TickerEntity ticker = getTickerReference(candle.getTicker());
+            candleRepository.save(new CandleEntity(
+                ticker,
+                candle.getOpen(),
+                candle.getHigh(),
+                candle.getLow(),
+                candle.getClose(),
+                candle.getTimestamp(),
+                candle.getPeriod()
+            ));
             cache.get(candle.getTicker()).compute(candle.getPeriod(),
                 (key, candle1) -> candle1 == null || candle.getTimestamp() > candle1.getTimestamp() ? candle : candle1
             );
         }
     }
 
-    public List<CandleEntityShort> getHistory(String ticker, long unit, long amount) {
+    public synchronized List<CandleEntityShort> getHistory(String ticker, long unit, long amount) {
         return candleRepository.findByTickerAndPeriodAndTimestampGreaterThan(
-            tickers.get(ticker),
+            getTickerReference(ticker),
             unit,
             getCurrentTime() - unit * (amount + 2));
     }
 
-    public long clearByTimestampAndPeriod(long timestamp, long period) {
+    public synchronized long clearByTimestampAndPeriod(long timestamp, long period) {
         return candleRepository.deleteByTimestampLessThanAndPeriodLessThanEqual(timestamp, period);
     }
 
-    public void informAboutTickers(Collection<String> tickers) {
-        Map<String, TickerEntity> newTickers = tickers.stream().filter(ticker -> !tickers.contains(ticker)).collect(
+    public synchronized void informAboutTickers(Collection<String> tickers) {
+        Map<String, TickerEntity> newTickers = tickers.stream()
+            .filter(ticker -> !allTickers.contains(ticker))
+            .collect(
             Collectors.toMap(ticker -> ticker, TickerEntity::new, (ticker1, ticker2) -> ticker1)
         );
-        this.tickers.putAll(newTickers);
+        this.allTickers.addAll(newTickers.keySet());
         newTickers.forEach((t, ticker) -> {
             cache.put(t, new HashMap<>());
             tickerRepository.save(ticker);
         });
     }
-    public Set<String> getTickers() { return tickers.keySet(); }
-    public Optional<CandleEntityFull> getCurrent(String ticker, long unit) {
+    public synchronized Set<String> getAllTickers() { return allTickers; }
+    public synchronized Optional<CandleEntityFull> getCurrent(String ticker, long unit) {
         return Optional.ofNullable(cache.get(ticker).get(unit));
     }
 
-    public CompanyDescriptor getCompany(String ticker) {
+    public synchronized CompanyDescriptor getCompany(String ticker) {
         return companyMap.get(ticker);
     }
 
-    public void saveNews(Collection<NewsDescriptor> newsDescriptors) {
+    public synchronized void saveNews(Collection<NewsDescriptor> newsDescriptors) {
+        informAboutTickers(newsDescriptors.stream().map(NewsDescriptor::ticker).toList());
         newsDescriptors.forEach(
-            newsDescriptor -> newsRepository.save(
-                newsDescriptor.ticker(), newsDescriptor.title(), newsDescriptor.description(), newsDescriptor.url()
-            )
+            newsDescriptor -> newsRepository.save(new NewsEntity(
+                newsDescriptor.id(),
+                newsDescriptor.timestamp(),
+                getTickerReference(newsDescriptor.ticker()),
+                cut(newsDescriptor.title()),
+                cut(newsDescriptor.description()),
+                cut(newsDescriptor.url())
+            ))
         );
     }
 
-    public List<NewsShort> getLastNews() {
-        return newsRepository.findAll(
+    private static String cut(String text) {
+        return text.length() > 255 ? text.substring(0,255) : text;
+    }
+
+    public synchronized List<NewsShort> getLastNews() {
+        return newsRepository.findAllByOrderByTimeDesc(
             Pageable.ofSize(20)
         );
+    }
+
+    private synchronized TickerEntity getTickerReference(String ticker) {
+        return entityManager.getReference(TickerEntity.class, ticker);
+        //return new TickerEntity(ticker);
+    }
+
+    private synchronized NewsEntity getNewsReference(String ticker) {
+        return entityManager.getReference(NewsEntity.class, ticker);
+    }
+
+    private synchronized CandleEntity getCandleReference(String ticker) {
+        return entityManager.getReference(CandleEntity.class, ticker);
     }
 
 }

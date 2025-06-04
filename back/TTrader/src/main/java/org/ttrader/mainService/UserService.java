@@ -10,7 +10,6 @@ import org.ttrader.mainService.entities.NewsShort;
 import org.ttrader.mainService.mainClient.AnalysisClient;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Profile("main-service")
 @Service
@@ -24,7 +23,7 @@ public class UserService {
     }
 
     Set<String> getTickers() {
-        return databaseService.getTickers();
+        return databaseService.getAllTickers();
     }
 
     List<CandleEntityShort> getHistory(String ticker, long unit, long amount) {
@@ -36,7 +35,7 @@ public class UserService {
     }
 
     List<SpecialAnalysis> getRecomendations() {
-        return databaseService.getTickers().stream().map(
+        return databaseService.getAllTickers().stream().map(
             ticker -> new SpecialAnalysis(ticker, analysisClient.analyse(
                 databaseService.getHistory(ticker, 10, 100)
             ))

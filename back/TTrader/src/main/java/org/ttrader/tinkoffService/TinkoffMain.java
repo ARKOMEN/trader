@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Profile;
     "org.ttrader.tinkoffService",
     "org.ttrader.secondaryServicesUtil",
     "org.ttrader.util",
-    "org.ttrader.alwaysRun"
+    "org.ttrader.alwaysRun",
+    "org.ttrader.config"
 })
 @Profile("tinkoff-service")
 public class TinkoffMain {

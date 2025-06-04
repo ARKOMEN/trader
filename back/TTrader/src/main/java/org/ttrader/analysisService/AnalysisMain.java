@@ -6,7 +6,8 @@ import org.springframework.context.annotation.Profile;
 
 @SpringBootApplication(scanBasePackages = {
     "org.ttrader.analysisService",
-    "org.ttrader.analysisUtil"
+    "org.ttrader.analysisUtil",
+    "org.ttrader.config"
 })
 @Profile("analysis-service")
 public class AnalysisMain {

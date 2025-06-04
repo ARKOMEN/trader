@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Profile;
 @SpringBootApplication(scanBasePackages = {
     "org.ttrader.newsService",
     "org.ttrader.util",
-    "org.ttrader.alwaysRun"
+    "org.ttrader.alwaysRun",
+    "org.ttrader.config"
 })
 @Profile("news-service")
 public class NewsApiMain {

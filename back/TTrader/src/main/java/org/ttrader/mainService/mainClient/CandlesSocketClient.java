@@ -29,8 +29,9 @@ public class CandlesSocketClient {
     }
 
     @RabbitListener(queues = "stocks")
-    public void handleTextMessage(TextMessage message) {
-        String text = message.getPayload();
+    public void handleTextMessage(String text) {
+        System.err.println("stocks alive =)");
+        System.err.println(text);
 
         JsonNode node;
         try {

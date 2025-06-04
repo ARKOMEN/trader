@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-public class TickerEntity {
+public class TickerEntity implements TickerShort{
     @Id
     @Column(nullable = false, length = 10)
     private String ticker;

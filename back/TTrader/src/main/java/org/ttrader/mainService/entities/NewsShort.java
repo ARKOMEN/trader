@@ -6,4 +6,5 @@ public interface NewsShort {
     String getTitle();
     String getDescription();
     String getUrl();
+    long getTime();
 }

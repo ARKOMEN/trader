@@ -25,9 +25,9 @@ public class NewsSocketClient {
         this.databaseService = databaseService;
     }
 
-    @RabbitListener(queues = "stocks")
-    public void handleTextMessage(TextMessage message) {
-        String text = message.getPayload();
+    @RabbitListener(queues = "news")
+    public void handleTextMessage(String text) {
+        System.err.println("news alive =)");
 
         JsonNode node;
         try {
@@ -37,19 +37,19 @@ public class NewsSocketClient {
         }
 
         List<NewsDescriptor> newsDescriptors = new ArrayList<>();
+        System.err.println("got news: ");
         for (JsonNode candle : node.get("news")) {
             newsDescriptors.add(new NewsDescriptor(
                 candle.get("k").asText(),
                 candle.get("t").asText(),
                 candle.get("d").asText(),
                 candle.get("u").asText(),
-                candle.get("i").asLong()
+                candle.get("i").asLong(),
+                candle.get("m").asLong()
             ));
         }
 
-        System.err.println("got news!");
-
-        //...
+        databaseService.saveNews(newsDescriptors);
 
     }
 }

@@ -5,6 +5,7 @@ public record NewsDescriptor(
     String title,
     String description,
     String url,
-    long id
+    long id,
+    long timestamp
 ) {
 }

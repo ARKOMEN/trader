@@ -36,6 +36,7 @@ public class NewsWebsocketClient {
                     .add("d", e.description())
                     .add("i", e.id())
                     .add("u", e.url())
+                    .add("m", e.timestamp())
                     .build()
                 ).toList())
             ).build().toString();

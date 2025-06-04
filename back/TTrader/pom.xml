@@ -172,6 +172,18 @@
 
             </build>
         </profile>
+        <!-- analysis service profile -->
+        <profile>
+            <id>analysis-profile</id>
+            <properties>
+                <mainClass>org.ttrader.analysisService.AnalysisMain</mainClass>
+                <start-class>${mainClass}</start-class>
+            </properties>
+            <build>
+                <finalName>TTrader-analysis-service</finalName>
+
+            </build>
+        </profile>
     </profiles>
 
 </project>
