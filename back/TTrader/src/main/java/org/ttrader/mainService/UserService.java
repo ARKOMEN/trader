@@ -2,13 +2,12 @@ package org.ttrader.mainService;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.ttrader.mainService.analisys.CompanyDescriptor;
 import org.ttrader.mainService.analisys.SpecialAnalysis;
 import org.ttrader.mainService.entities.CandleEntityFull;
 import org.ttrader.mainService.entities.CandleEntityShort;
 import org.ttrader.mainService.entities.NewsShort;
-import org.ttrader.mainService.mainClient.AnalysisClient;
+import org.ttrader.mainService.mainClient.analysis.AnalysisClient;
 
 import java.util.*;
 

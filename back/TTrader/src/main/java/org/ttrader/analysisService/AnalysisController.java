@@ -66,8 +66,8 @@ public class AnalysisController {
     }
 
     private static CommonAnalysis evaluate(List<AnalysisCandle> candles) {
-        int longPeriod = candles.size() - 1;
-        int shortPeriod = longPeriod/10;
+        int longPeriod = candles.size()/2;
+        int shortPeriod = candles.size()/5;
         if (candles.size() < longPeriod + 1 || shortPeriod < 1) {
             return new CommonAnalysis(AnalysisAction.HOLD, 0);
         }

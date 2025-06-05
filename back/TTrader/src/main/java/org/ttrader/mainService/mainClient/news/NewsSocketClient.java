@@ -1,4 +1,4 @@
-package org.ttrader.mainService.mainClient;
+package org.ttrader.mainService.mainClient.news;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
