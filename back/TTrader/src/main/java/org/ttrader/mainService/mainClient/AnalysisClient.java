@@ -30,7 +30,7 @@ public class AnalysisClient {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public CommonAnalysis analyse(List<CandleEntityShort> candles) {
+    public CommonAnalysis analyse(String correlationId, List<CandleEntityShort> candles) {
 //        String result = webClient.post().uri(
 //            uriBuilder -> uriBuilder.path("/analyse").build()
 //        ).body("body", String.class)
@@ -38,19 +38,23 @@ public class AnalysisClient {
 //            .bodyToMono(String.class)
 //            .block();
 
+        System.err.println(correlationId + " : [analysis client] analyse candles: " + candles.size());
+
         String result = (String)rabbitTemplate.convertSendAndReceive(
             "analysis",
-            Json.createObjectBuilder().add("candles",
-                ofObjects(
-                    candles.stream().map(candle -> Json.createObjectBuilder()
-                        .add("o", candle.getOpen())
-                        .add("h", candle.getHigh())
-                        .add("l", candle.getLow())
-                        .add("c", candle.getClose())
-                        .add("t", candle.getTimestamp())
-                        .build()
-                    ).toList()
-                )).build().toString()
+            Json.createObjectBuilder()
+                .add("event", correlationId)
+                .add("candles",
+                    ofObjects(
+                        candles.stream().map(candle -> Json.createObjectBuilder()
+                            .add("o", candle.getOpen())
+                            .add("h", candle.getHigh())
+                            .add("l", candle.getLow())
+                            .add("c", candle.getClose())
+                            .add("t", candle.getTimestamp())
+                            .build()
+                        ).toList()
+                    )).build().toString()
         );
 
         JsonNode node;

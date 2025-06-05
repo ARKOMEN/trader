@@ -130,13 +130,17 @@ public class TinkoffService extends Endpoint {
     // Автоматическое подключение при старте приложения
     @PostConstruct
     public void init() {
-        websocketClient.informAboutTickers(figis.values().stream().map(figi -> figi.ticker).collect(Collectors.toList()));
+        String event = UUID.randomUUID().toString();
+        System.err.println(event + " : [tinkoff service] informing about tickers: " + figis.size());
+        websocketClient.informAboutTickers(event, figis.values().stream().map(figi -> figi.ticker).collect(Collectors.toList()));
         connect();
     }
 
     @PreDestroy
     public void finish() {
-        this.unsubscribe(figis.keySet());
+        String event = UUID.randomUUID().toString();
+        System.err.println(event + " : [tinkoff service] unsubscribing...");
+        this.unsubscribe(event, figis.keySet());
     }
 
     // Подключение к WebSocket
@@ -164,15 +168,15 @@ public class TinkoffService extends Endpoint {
     @Bean
     public synchronized CommandLineRunner CommandLineRunnerBean() {
         return (args) -> {
-            System.err.println("running!");
-            this.subscribe(figis.keySet());
+            String event = UUID.randomUUID().toString();
+            System.err.println(event + " : [tinkoff service] subscribing...");
+            this.subscribe(event, figis.keySet());
         };
     }
 
     @Override
     @OnOpen
     public synchronized void onOpen(Session session, EndpointConfig endpointConfig) {
-        System.err.println("✅ Connected to Tinkoff WebSocket!");
         session.addMessageHandler(String.class, this::onMessage);
         this.session = session;
     }
@@ -180,10 +184,12 @@ public class TinkoffService extends Endpoint {
 
     @OnMessage
     public void onMessage(String message) {
-        System.err.println("📩 Message from server: " + message);
+        String event = UUID.randomUUID().toString();
+        System.err.println(event + " : [tinkoff service] got message");
         try{
             JsonNode node = new ObjectMapper().readTree(message);
             if (!node.has("lastPrice")) {
+                System.err.println(event + " : [tinkoff service] unknown message: " + message);
                 return;
             }
             JsonNode node1 = node.get("lastPrice");
@@ -194,22 +200,26 @@ public class TinkoffService extends Endpoint {
             String time = node1.get("time").asText();
             Instant instant = Instant.parse(time.split("\\.")[0] + "Z");
 
-            websocketClient.sendMessage(List.of(new TickerPrice(figi.ticker, price, instant.getEpochSecond())));
+            System.err.println(event + " : [tinkoff service] last price message (ticker, figi, price): " +
+                figi.ticker + " " + figi.figi + " " + price);
+
+            websocketClient.sendMessage(event, List.of(new TickerPrice(figi.ticker, price, instant.getEpochSecond())));
         }
         catch (Exception e) {
             e.printStackTrace();// todo logging errors
         }
     }
 
-    public void subscribe(Collection<String> symbols) {
-        subscribe(symbols, "SUBSCRIPTION_ACTION_SUBSCRIBE");
+    public void subscribe(String event, Collection<String> symbols) {
+        subscribe(event, symbols, "SUBSCRIPTION_ACTION_SUBSCRIBE");
     }
 
-    public void unsubscribe(Collection<String> symbols) {
-        subscribe(symbols, "SUBSCRIPTION_ACTION_UNSUBSCRIBE");
+    public void unsubscribe(String event, Collection<String> symbols) {
+        subscribe(event, symbols, "SUBSCRIPTION_ACTION_UNSUBSCRIBE");
     }
 
-    public synchronized void subscribe(Collection<String> symbols, String subscription) {
+    public synchronized void subscribe(String event, Collection<String> symbols, String subscription) {
+        System.err.println(event + " : [tinkoff service] action: " + subscription);
         if (session != null && session.isOpen()) {
             try {
                 session.getAsyncRemote().sendText(
@@ -226,6 +236,9 @@ public class TinkoffService extends Endpoint {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        else {
+            System.err.println(event + " : [tinkoff service] session is inactive =(");
         }
     }
 

@@ -45,7 +45,9 @@ public class FinnhubService {
     // Автоматическое подключение при старте приложения
     @PostConstruct
     public void init() {
-        websocketClient.informAboutTickers(tickers);
+        String event = UUID.randomUUID().toString();
+        System.err.println(event + " : [finnhub service] informing about tickers: " + tickers.length);
+        websocketClient.informAboutTickers(event, tickers);
         connect();
     }
 
@@ -69,7 +71,6 @@ public class FinnhubService {
     @Bean
     public CommandLineRunner CommandLineRunnerBean() {
         return (args) -> {
-            System.err.println("running!");
             for (String ticker : tickers) {
                 this.subscribe(ticker);
             }
@@ -79,7 +80,8 @@ public class FinnhubService {
     // Когда соединение установлено
     @OnOpen
     public void onOpen(Session session) {
-        System.err.println("✅ Connected to Finnhub WebSocket!");
+        String event = UUID.randomUUID().toString();
+        System.err.println(event + " : [finnhub service] connected");
         this.session = session;
     }
 
@@ -87,13 +89,15 @@ public class FinnhubService {
     // Обработка входящих сообщений
     @OnMessage
     public void onMessage(String message) {
-        System.err.println("📩 Message from server: " + message);
+        String event = UUID.randomUUID().toString();
+        System.err.println(event + " : [finnhub service] got message");
         try{
             JsonNode node = new ObjectMapper().readTree(message);
             if (!"trade".equals(node.get("type").asText())) {
                 return;
             }
             List<TickerPrice> newCandles = new ArrayList<>();
+            System.err.println(event + " : [finnhub service] got info about tickers: " + node.get("data").size());
             for (JsonNode node1 : node.get("data")) {
                 try {
                     String ticker = node1.get("s").asText();
@@ -107,7 +111,7 @@ public class FinnhubService {
                     e.printStackTrace();
                 }
             }
-            websocketClient.sendMessage(newCandles);
+            websocketClient.sendMessage(event, newCandles);
         }
         catch (Exception e) {
             e.printStackTrace();// todo logging errors
@@ -115,6 +119,7 @@ public class FinnhubService {
     }
 
     public void subscribe(String symbol) {
+        String event = UUID.randomUUID().toString();
         if (session != null && session.isOpen()) {
             try {
                 String message = objectMapper.writeValueAsString(
@@ -122,7 +127,7 @@ public class FinnhubService {
                 );
                 session.getAsyncRemote().sendText(message);
                 //subscribedSymbols.add(symbol);
-                System.err.println("🔔 Subscribed to: " + symbol);
+                System.err.println(event + " : [finnhub service] subscribed to: " + symbol);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -130,6 +135,7 @@ public class FinnhubService {
     }
 
     public void unsubscribe(String symbol) {
+        String event = UUID.randomUUID().toString();
         if (session != null && session.isOpen()) {
             try {
                 String message = objectMapper.writeValueAsString(
@@ -138,6 +144,7 @@ public class FinnhubService {
                 session.getAsyncRemote().sendText(message);
                 //subscribedSymbols.remove(symbol);
                 System.err.println("🔕 Unsubscribed from: " + symbol);
+                System.err.println(event + " : [finnhub service] unsubscribed from: " + symbol);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -147,13 +154,15 @@ public class FinnhubService {
     // Закрытие соединения
     @OnClose
     public void onClose(Session session, CloseReason reason) {
-        System.err.println("❌ Connection Closed: " + reason.getReasonPhrase());
+        String event = UUID.randomUUID().toString();
+        System.err.println(event + " : [finnhub service] connection closed: " + reason.getReasonPhrase());
     }
 
     // Обработка ошибок
     @OnError
     public void onError(Session session, Throwable throwable) {
-        System.err.println("❌ Error: " + throwable.getMessage());
+        String event = UUID.randomUUID().toString();
+        System.err.println(event + " : [finnhub service] error: " + throwable.getMessage());
     }
 
     // Вспомогательный класс для сообщений

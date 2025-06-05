@@ -2,6 +2,7 @@ package org.ttrader.mainService;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.ttrader.mainService.analisys.CompanyDescriptor;
 import org.ttrader.mainService.analisys.SpecialAnalysis;
 import org.ttrader.mainService.entities.CandleEntityFull;
@@ -22,40 +23,50 @@ public class UserService {
         this.analysisClient = analysisClient;
     }
 
-    Set<String> getTickers() {
-        return databaseService.getAllTickers();
+    public Set<String> getTickers(String correlationId) {
+        System.err.println(correlationId + " : [user service] retrieving tickers...");
+        return databaseService.getAllTickers(correlationId);
     }
 
-    List<CandleEntityShort> getHistory(String ticker, long unit, long amount) {
-        return databaseService.getHistory(ticker, unit, amount);
+    public List<CandleEntityShort> getHistory(String correlationId, String ticker, long unit, long amount) {
+        System.err.println(correlationId + " : [user service] retrieving history...");
+        return databaseService.getHistory(correlationId, ticker, unit, amount);
     }
 
-    Optional<CandleEntityFull> getCurrent(String ticker, long unit) {
-        return databaseService.getCurrent(ticker, unit);
+    public Optional<CandleEntityFull> getCurrent(String correlationId, String ticker, long unit) {
+        System.err.println(correlationId + " : [user service] retrieving current price info...");
+        return databaseService.getCurrent(correlationId, ticker, unit);
     }
 
-    List<SpecialAnalysis> getRecomendations() {
-        return databaseService.getAllTickers().stream().map(
-            ticker -> new SpecialAnalysis(ticker, analysisClient.analyse(
-                databaseService.getHistory(ticker, 10, 100)
+    public List<SpecialAnalysis> getRecomendations(String correlationId) {
+        System.err.println(correlationId + " : [user service] retrieving recommendations...");
+        return databaseService.getAllTickers(correlationId).stream().map(
+            ticker -> new SpecialAnalysis(ticker, analysisClient.analyse(correlationId,
+                databaseService.getHistory(correlationId, ticker, 10, 100)
             ))
         ).sorted(
             (o1, o2) -> o2.confidence() - o1.confidence()
         ).toList();
     }
 
-    SpecialAnalysis singleAnalysis(String ticker) {
+    public SpecialAnalysis singleAnalysis(String correlationId, String ticker) {
+        System.err.println(correlationId + " : [user service] retrieving single analysis info...");
         return new SpecialAnalysis(
-            ticker, analysisClient.analyse(databaseService.getHistory(ticker, 10, 100))
+            ticker, analysisClient.analyse(
+                correlationId,
+                databaseService.getHistory(correlationId, ticker, 10, 100)
+            )
         );
     }
 
-    CompanyDescriptor getCompany(String ticker) {
-        return databaseService.getCompany(ticker);
+    public CompanyDescriptor getCompany(String correlationId, String ticker) {
+        System.err.println(correlationId + " : [user service] retrieving company info...");
+        return databaseService.getCompany(correlationId, ticker);
     }
 
-    List<NewsShort> getNews() {
-        return databaseService.getLastNews();
+    public List<NewsShort> getNews(String correlationId) {
+        System.err.println(correlationId + " : [user service] retrieving news...");
+        return databaseService.getLastNews(correlationId);
     }
 
 }

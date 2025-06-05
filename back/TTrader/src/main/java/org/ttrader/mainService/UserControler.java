@@ -15,6 +15,7 @@ import javax.json.Json;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.ttrader.util.TTraderUtil.ofObjects;
 
@@ -36,12 +37,17 @@ public class UserControler {
     }
 
     @GetMapping("/recomend")
-    public String recomend() {
+    public String recomend(@RequestHeader(value = "X-Correlation-Id", required = false) String tempCorr) {
 
+        String correlationId = tempCorr == null ? UUID.randomUUID().toString() : tempCorr;
+
+        System.err.println(correlationId + " : [controller] GET /reccomend");
+
+        System.err.println(correlationId + " : [controller] retrieving recommendations...");
         return Json.createObjectBuilder().add("recommend", ofObjects(
-            userService.getRecomendations().stream().map(
+            userService.getRecomendations(tempCorr).stream().map(
                 recomendation -> {
-                    CompanyDescriptor companyDescriptor = userService.getCompany(recomendation.ticker());
+                    CompanyDescriptor companyDescriptor = userService.getCompany(correlationId, recomendation.ticker());
                     return Json.createObjectBuilder()
                         .add("ticker", recomendation.ticker())
                         .add("action", recomendation.analysisAction().getValue())
@@ -65,9 +71,15 @@ public class UserControler {
     }
 
     @GetMapping("/news")
-    public String news() {
+    public String news(@RequestHeader(value = "X-Correlation-Id", required = false) String tempCorr) {
+
+        String correlationId = tempCorr == null ? UUID.randomUUID().toString() : tempCorr;
+
+        System.err.println(correlationId + " : [controller] GET /news");
+
+        System.err.println(correlationId + " : [controller] retrieving news...");
         return Json.createObjectBuilder().add("news", ofObjects(
-            userService.getNews().stream().map(
+            userService.getNews(correlationId).stream().map(
                 newsShort -> Json.createObjectBuilder()
                     .add("ticker", newsShort.getTicker().getTicker())
                     .add("title", newsShort.getTitle())
@@ -79,23 +91,32 @@ public class UserControler {
     }
 
     @GetMapping("/ticker/{ticker}")
-    public String ticker(@PathVariable String ticker, @RequestParam Long unit, @RequestParam Long count) {
+    public String ticker(@PathVariable String ticker, @RequestParam Long unit, @RequestParam Long count,
+                         @RequestHeader(value = "X-Correlation-Id", required = false) String tempCorr) {
+
+        String correlationId = tempCorr == null ? UUID.randomUUID().toString() : tempCorr;
+
+        System.err.println(correlationId + " : [controller] GET /reccomend/" + ticker + " unit = " + unit + ", count = " + count);
 
         CandlePeriod candlePeriod;
         {
             Optional<CandlePeriod> period1 = CandlePeriod.ofPeriod(unit);
             if (period1.isEmpty()) {
+                System.err.println(correlationId + " : [controller] bad request (unit not exist)");
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid time unit");
             }
             candlePeriod = period1.get();
         }
         if (count > candlePeriod.getLiveTime()) {
+            System.err.println(correlationId + " : [controller] bad request (period is too long)");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Period is too long");
         }
 
-        List<CandleEntityShort> history = userService.getHistory(ticker, unit, count);
+        System.err.println(correlationId + " : [controller] retrieving history info...");
 
-        CompanyDescriptor companyDescriptor = userService.getCompany(ticker);
+        List<CandleEntityShort> history = userService.getHistory(correlationId, ticker, unit, count);
+
+        CompanyDescriptor companyDescriptor = userService.getCompany(correlationId, ticker);
 
         return Json.createObjectBuilder()
             .add("company", companyDescriptor.companyName())
@@ -114,17 +135,25 @@ public class UserControler {
     }
 
     @GetMapping("/ticker/{ticker}/current")
-    public String getCurrent(@PathVariable String ticker, @RequestParam Long unit) {
+    public String getCurrent(@PathVariable String ticker, @RequestParam Long unit,
+                             @RequestHeader(value = "X-Correlation-Id", required = false) String tempCorr) {
+
+        String correlationId = tempCorr == null ? UUID.randomUUID().toString() : tempCorr;
+
+        System.err.println(correlationId + " : [controller] GET /ticker/" + ticker + "/current unit = " + unit);
+
         CandlePeriod candlePeriod;
         {
             Optional<CandlePeriod> period1 = CandlePeriod.ofPeriod(unit);
             if (period1.isEmpty()) {
+                System.err.println(correlationId + " : [controller] bad request (unit not exist)");
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid time unit");
             }
             candlePeriod = period1.get();
         }
 
-        Optional<CandleEntityFull> candleEntity = userService.getCurrent(ticker, unit);
+        System.err.println(correlationId + " : [controller] retrieving current price...");
+        Optional<CandleEntityFull> candleEntity = userService.getCurrent(correlationId, ticker, unit);
 
         if (candleEntity.isEmpty())
             return Json.createObjectBuilder().add("present", false).build().toString();
@@ -144,7 +173,13 @@ public class UserControler {
     }
 
     @GetMapping("/units")
-    public String getPeriods() {
+    public String getPeriods(@RequestHeader(value = "X-Correlation-Id", required = false) String tempCorr) {
+
+        String correlationId = tempCorr == null ? UUID.randomUUID().toString() : tempCorr;
+
+        System.err.println(correlationId + " : [controller] GET /units");
+        System.err.println(correlationId + " : [controller] retrieving units info...");
+
         return Json.createObjectBuilder()
             .add("periods", ofObjects(
                 Arrays.stream(CandlePeriod.all).map(

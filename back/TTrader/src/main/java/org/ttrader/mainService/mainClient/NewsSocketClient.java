@@ -27,17 +27,20 @@ public class NewsSocketClient {
 
     @RabbitListener(queues = "news")
     public void handleTextMessage(String text) {
-        System.err.println("news alive =)");
+
+        String correlationId;
 
         JsonNode node;
         try {
             node = new ObjectMapper().readTree(text);
+            correlationId = node.get("event").asText(UUID.randomUUID().toString());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
         List<NewsDescriptor> newsDescriptors = new ArrayList<>();
-        System.err.println("got news: ");
+        System.err.println(correlationId + " : [news service] got news...");
+        System.err.println(correlationId + " : [news service] size: " + node.get("news").size());
         for (JsonNode candle : node.get("news")) {
             newsDescriptors.add(new NewsDescriptor(
                 candle.get("k").asText(),
@@ -49,7 +52,9 @@ public class NewsSocketClient {
             ));
         }
 
-        databaseService.saveNews(newsDescriptors);
+        System.err.println(correlationId + " : [news service] saving news...");
+
+        databaseService.saveNews(correlationId, newsDescriptors);
 
     }
 }

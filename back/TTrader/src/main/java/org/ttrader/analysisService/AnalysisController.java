@@ -19,6 +19,7 @@ import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Profile("analysis-service")
 @Service
@@ -35,9 +36,13 @@ public class AnalysisController {
     public String analyse(/*@RequestBody*/ String requestBody) {
         JsonNode node;
         List<AnalysisCandle> candles;
+        String eventId;
         try {
             node = new ObjectMapper().readTree(requestBody);
+            eventId = node.get("event").asText(UUID.randomUUID().toString());
+            System.err.println(eventId + " : [analysis service] got analysis request");
             JsonNode node1 = node.get("candles");
+            System.err.println(eventId + " : [analysis service] candles to analyse: " + node1.size());
             candles = new ArrayList<>();
             for (JsonNode node2 : node1) {
                 candles.add(new AnalysisCandle(
@@ -53,6 +58,7 @@ public class AnalysisController {
         }
 
         CommonAnalysis result = evaluate(candles);
+        System.err.println(eventId + " : [analysis service] result action " +result.action().getValue() + " with confidence " + result.confidence());
         return Json.createObjectBuilder()
             .add("action", result.action().getValue())
             .add("confidence", result.confidence())

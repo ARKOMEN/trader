@@ -29,31 +29,37 @@ public class SecondaryWebsocketClient {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public synchronized void informAboutTickers(String[] tickers) {
+    public synchronized void informAboutTickers(String correlationId, String[] tickers) {
+        System.err.println(correlationId + " : [secondary service] inform about tickers (array): " + tickers.length);
         rabbitTemplate.convertAndSend(
             "stocks",
             Json.createObjectBuilder()
                 .add("type", "tickers")
+                .add("event", correlationId)
                 .add("tickers", ofStrings(tickers))
                 .build().toString()
         );
     }
 
-    public synchronized void informAboutTickers(Collection<String> tickers) {
+    public synchronized void informAboutTickers(String correlationId, Collection<String> tickers) {
+        System.err.println(correlationId + " : [secondary service] inform about tickers (collection): " + tickers.size());
         rabbitTemplate.convertAndSend(
             "stocks",
             Json.createObjectBuilder()
                 .add("type", "tickers")
+                .add("event", correlationId)
                 .add("tickers", ofStrings(tickers))
                 .build().toString()
         );
     }
 
-    public synchronized void sendMessage(List<TickerPrice> candles) {
+    public synchronized void sendMessage(String correlationId, List<TickerPrice> candles) {
+        System.err.println(correlationId + " : [secondary service] send candles: " + candles.size());
         rabbitTemplate.convertAndSend(
             "stocks",
             Json.createObjectBuilder()
                 .add("type", "prices")
+                .add("event", correlationId)
                 .add("prices",
                     ofObjects(candles.stream().map(e -> Json.createObjectBuilder()
                         .add("i", e.ticker())

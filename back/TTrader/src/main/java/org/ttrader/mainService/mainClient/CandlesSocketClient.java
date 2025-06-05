@@ -30,12 +30,13 @@ public class CandlesSocketClient {
 
     @RabbitListener(queues = "stocks")
     public void handleTextMessage(String text) {
-        System.err.println("stocks alive =)");
-        System.err.println(text);
 
         JsonNode node;
+        String event;
         try {
             node = new ObjectMapper().readTree(text);
+            event = node.get("event").asText(UUID.randomUUID().toString());
+            System.err.println(event + " : [candles client] got message");
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -43,13 +44,15 @@ public class CandlesSocketClient {
         String type = node.get("type").asText();
         switch (type) {
             case "tickers" -> {
+                System.err.println(event + " : [candles client] type tickers");
                 Set<String> newTickers = new HashSet<>();
                 for (JsonNode ticker : node.get("tickers")) {
                     newTickers.add(ticker.asText());
                 }
-                databaseService.informAboutTickers(newTickers);
+                databaseService.informAboutTickers(event, newTickers);
             }
             case "prices" -> {
+                System.err.println(event + " : [candles client] type prices");
                 List<TickerPrice> tickerPrices = new ArrayList<>();
                 for (JsonNode candle : node.get("prices")) {
                     tickerPrices.add(new TickerPrice(
@@ -90,7 +93,10 @@ public class CandlesSocketClient {
                         }
                     }
                 }
-                databaseService.saveAllFunnies(newCandles);
+                databaseService.saveAllFunnies(event, newCandles);
+            }
+            default -> {
+                System.err.println(event + " : [candles client] unknown type: " + type);
             }
         }
     }

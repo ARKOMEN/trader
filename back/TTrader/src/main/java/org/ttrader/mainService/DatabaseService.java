@@ -66,9 +66,9 @@ public class DatabaseService {
         this.cache = this.allTickers.stream().collect(Collectors.toMap(t -> t, t -> new HashMap<>(), (a, b) -> null));
     }
 
-    public synchronized void saveAllFunnies(List<? extends CandleEntityFull> candles) {
-        informAboutTickers(candles.stream().map(CandleEntityFull::getTicker).toList());
-        System.err.println("Saving " + candles.size() + " candles");
+    public synchronized void saveAllFunnies(String correlationId, List<? extends CandleEntityFull> candles) {
+        informAboutTickers(correlationId, candles.stream().map(CandleEntityFull::getTicker).toList());
+        System.err.println(correlationId + " : [database] saving candles: " + candles.size());
         for (CandleEntityFull candle : candles) {
             TickerEntity ticker = getTickerReference(candle.getTicker());
             candleRepository.save(new CandleEntity(
@@ -86,7 +86,9 @@ public class DatabaseService {
         }
     }
 
-    public synchronized List<CandleEntityShort> getHistory(String ticker, long unit, long amount) {
+    public synchronized List<CandleEntityShort> getHistory(String correlationId, String ticker, long unit, long amount) {
+        System.err.println(correlationId + " : [database] receiving history for (ticker, unit, amount): " +
+            ticker + " " + unit + " " + amount);
         return candleRepository.findByTickerAndPeriodAndTimestampGreaterThan(
             getTickerReference(ticker),
             unit,
@@ -97,7 +99,8 @@ public class DatabaseService {
         return candleRepository.deleteByTimestampLessThanAndPeriodLessThanEqual(timestamp, period);
     }
 
-    public synchronized void informAboutTickers(Collection<String> tickers) {
+    public synchronized void informAboutTickers(String correlationId, Collection<String> tickers) {
+        System.err.println(correlationId + " : [database] saving tickers: " + tickers.size());
         Map<String, TickerEntity> newTickers = tickers.stream()
             .filter(ticker -> !allTickers.contains(ticker))
             .collect(
@@ -109,17 +112,25 @@ public class DatabaseService {
             tickerRepository.save(ticker);
         });
     }
-    public synchronized Set<String> getAllTickers() { return allTickers; }
-    public synchronized Optional<CandleEntityFull> getCurrent(String ticker, long unit) {
+    public synchronized Set<String> getAllTickers(String correlationId) {
+        System.err.println(correlationId + " : [database] retrieving tickers: " + allTickers.size());
+        return allTickers;
+    }
+    public synchronized Optional<CandleEntityFull> getCurrent(String correlationId, String ticker, long unit) {
+        System.err.println(correlationId + " : [database] getting current price for ticker: " + ticker);
+        Optional<CandleEntityFull> res = Optional.ofNullable(cache.get(ticker).get(unit));
+        System.err.println(correlationId + " : [database] is value present: " + (res.isEmpty() ? "NO" : "YES"));
         return Optional.ofNullable(cache.get(ticker).get(unit));
     }
 
-    public synchronized CompanyDescriptor getCompany(String ticker) {
+    public synchronized CompanyDescriptor getCompany(String correlationId, String ticker) {
+        System.err.println(correlationId + " : [database] getting company info for ticker: " + ticker);
         return companyMap.get(ticker);
     }
 
-    public synchronized void saveNews(Collection<NewsDescriptor> newsDescriptors) {
-        informAboutTickers(newsDescriptors.stream().map(NewsDescriptor::ticker).toList());
+    public synchronized void saveNews(String correlationId, Collection<NewsDescriptor> newsDescriptors) {
+        System.err.println(correlationId + " : [database] saving news: " + newsDescriptors.size());
+        informAboutTickers(correlationId, newsDescriptors.stream().map(NewsDescriptor::ticker).toList());
         newsDescriptors.forEach(
             newsDescriptor -> newsRepository.save(new NewsEntity(
                 newsDescriptor.id(),
@@ -136,7 +147,8 @@ public class DatabaseService {
         return text.length() > 255 ? text.substring(0,255) : text;
     }
 
-    public synchronized List<NewsShort> getLastNews() {
+    public synchronized List<NewsShort> getLastNews(String correlationId) {
+        System.err.println(correlationId + " : [database] retrieving last news...");
         return newsRepository.findAllByOrderByTimeDesc(
             Pageable.ofSize(20)
         );
